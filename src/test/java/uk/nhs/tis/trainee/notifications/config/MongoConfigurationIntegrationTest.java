@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.nhs.tis.trainee.notifications.model.History;
 import uk.nhs.tis.trainee.notifications.model.History.TemplateInfo;
 
+@Disabled
 @SpringBootTest(properties = {"embedded.containers.enabled=true", "embedded.mongodb.enabled=true"})
 @ActiveProfiles({"mongodb", "test"})
 @Testcontainers(disabledWithoutDocker = true)

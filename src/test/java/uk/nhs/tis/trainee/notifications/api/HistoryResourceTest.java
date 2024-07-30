@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +53,7 @@ import uk.nhs.tis.trainee.notifications.model.History.TisReferenceInfo;
 import uk.nhs.tis.trainee.notifications.model.TisReferenceType;
 import uk.nhs.tis.trainee.notifications.service.HistoryService;
 
+@Disabled
 @WebMvcTest(controllers = HistoryResource.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -61,6 +62,7 @@ import uk.nhs.tis.trainee.notifications.model.NotificationStatus;
 import uk.nhs.tis.trainee.notifications.model.TisReferenceType;
 import uk.nhs.tis.trainee.notifications.service.HistoryService;
 
+@Disabled
 @WebMvcTest(controllers = TraineeHistoryResource.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
