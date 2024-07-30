@@ -1,42 +1,97 @@
-# TIS Microservice Template
+# TIS Trainee Notifications
 
 ## About
-This is a template to be used for TIS microservices with the following
-technology:
+This service manages and sends notifications to trainees based on TIS
+Self-Service events.
 
- - Java 17
- - Spring Boot
- - Gradle
- - JUnit 5
+## Developing
 
-Boilerplate code is to be generated with:
- - Lombok
- - MapStruct
+### Running
 
-Code quality checking and enforcement is done with the following tools:
- - EditorConfig
- - Checkstyle
- - JaCoCo
- - SonarQube
+```shell
+gradlew bootRun
+```
 
-Error and exception logging is done using Sentry.
+#### Pre-Requisites
 
-## TODO
-To use this template, create a new repository from it and follow the TODOs in
-the code, with the following additional changes.
- - Update copyright year in [LICENSE](LICENSE).
- - Update copyright year in [TemplateApplication].
- - Update copyright year in [TemplateApplicationTest].
- - Update this README.
- - Sentry:
-    - Set up Sentry project.
-    - Provide `SENTRY_DSN` and `SENTRY_ENVIRONMENT` as environmental variables
-   during deployment.
- - Sonar:
-    - Add repository to SonarCloud.
-    - Add SonarCloud API key to repository secrets.
- - Update Dependabot configuration to remove unneeded teams.
- - Update the references to `tis-template` and port number in [task-definition].
+ - A Redis instance for caching Person ID to User ID mappings.
+ - A running instance of localstack or access to Amazon SQS, to retrieve
+   messages from the queue given as `COJ_RECEIVED_QUEUE`.
+ - `COJ_RECEIVED_QUEUE` should have a visibility timeout longer than the user
+   cache takes to build, failure to do so may lead to duplicate emails being
+   sent. See log message `Total time taken to cache all user accounts was:
+   <num>s` for time taken.
+ - Access to an Amazon Cognito User Pool to get user details.
+
+##### AWS Credentials
+
+AWS credentials are retrieved using the [DefaultCredentialsProvider], see the
+associated documentation for details of how to provide credentials.
+
+##### AWS Region
+
+The AWS region is retrieved using the [DefaultAwsRegionProviderChain], see the
+associated document for details of how to provide the region.
+
+#### Environmental Variables
+
+| Name                          | Description                                                        | Default   |
+|-------------------------------|--------------------------------------------------------------------|-----------|
+| ACCOUNT_CONFIRMED_QUEUE       | The queue URL for account confirmation events.                     |           |
+| APP_DOMAIN                    | The domain to be used for links in email notifications. (Optional) |           |
+| AWS_XRAY_DAEMON_ADDRESS       | The AWS XRay daemon host. (Optional)                               |           |
+| COGNITO_USER_POOL_ID          | The user pool to get user details from.                            |           |
+| COJ_RECEIVED_QUEUE            | The queue URL for Conditions of Joining received events.           |           |
+| ENVIRONMENT                   | The environment to log events against.                             | local     |
+| EMAIL_SENDER                  | Where email notifications are to be sent from.                     |           |
+| NOTIFICATIONS_EVENT_TOPIC_ARN | Broadcast endpoint for notification events                         |           |
+| REDIS_HOST                    | Redis server host                                                  | localhost |
+| REDIS_PASSWORD                | Login password of the redis server.                                | password  |
+| REDIS_PORT                    | Redis server port.                                                 | 6379      |
+| REDIS_SSL                     | Whether to enable SSL support.                                     | false     |
+| REDIS_USERNAME                | Login username of the redis server                                 | default   |
+| SENTRY_DSN                    | A Sentry error monitoring Data Source Name. (Optional)             |           |
+
+#### Usage Examples
+
+##### Conditions of Joining Received
+
+The Conditions of Joining event should be sent to the `COJ_RECEIVED_QUEUE`, with
+the following structure.
+
+```json
+{
+  "personId": "47165",
+  "conditionsOfJoining": {
+    "syncedAt": "2022-08-01T22:01:02Z"
+  }
+}
+```
+
+#### Service Health
+
+Spring Actuator is included to provide a health check endpoint, which  can be
+accessed at `<host>:<port>/notifications/actuator/health`.
+
+### Testing
+
+The Gradle `test` task can be used to run automated tests and produce coverage
+reports.
+```shell
+gradlew test
+```
+
+The Gradle `check` lifecycle task can be used to run automated tests and also
+verify formatting conforms to the code style guidelines.
+```shell
+gradlew check
+```
+
+### Building
+
+```shell
+gradlew bootBuildImage
+```
 
 ## Versioning
 This project uses [Semantic Versioning](semver.org).
@@ -44,6 +99,5 @@ This project uses [Semantic Versioning](semver.org).
 ## License
 This project is license under [The MIT License (MIT)](LICENSE).
 
-[task-definition]: .aws/task-definition-template.json
-[TemplateApplication]: src/main/java/uk/nhs/hee/tis/template/TemplateApplication.java
-[TemplateApplicationTest]: src/test/java/uk/nhs/hee/tis/template/TemplateApplicationTest.java
+[DefaultCredentialsProvider]:(https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/auth/credentials/DefaultCredentialsProvider.html)
+[DefaultAwsRegionProviderChain]:(https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/regions/providers/DefaultAwsRegionProviderChain.html)

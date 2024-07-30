@@ -1,9 +1,137 @@
 server:
-  # TODO: Update server port and context path to a unique value.
-  port: 8080
+  port: 8211
   servlet:
-    context-path: /template
+    context-path: /notifications
+
+application:
+  cache:
+    key-prefix: Notifications
+    time-to-live: PT24H
+  cognito:
+    user-pool-id: ${COGNITO_USER_POOL_ID}
+  domain: ${APP_DOMAIN:}
+  email:
+    sender: ${EMAIL_SENDER}
+    enabled: ${NOTIFICATIONS_EMAIL_ENABLED:false}
+  environment: ${ENVIRONMENT:local}
+  in-app:
+    enabled: ${NOTIFICATIONS_IN_APP_ENABLED:false}
+  notifications-whitelist: ${NOTIFICATIONS_WHITELIST:[]}
+  immediate-notifications-delay-minutes: ${IMMEDIATE_NOTIFICATIONS_DELAY:60}
+  queues:
+    account-confirmed: ${ACCOUNT_CONFIRMED_QUEUE}
+    account-updated: ${ACCOUNT_UPDATED_QUEUE}
+    coj-received: ${COJ_RECEIVED_QUEUE}
+    credential-revoked: ${CREDENTIAL_REVOKED_QUEUE}
+    contact-details-updated: ${CONTACT_DETAILS_UPDATED_QUEUE}
+    email-failure: ${EMAIL_FAILURE_QUEUE}
+    form-updated: ${FORM_UPDATED_QUEUE}
+    placement-updated: ${PLACEMENT_UPDATED_QUEUE}
+    placement-deleted: ${PLACEMENT_DELETED_QUEUE}
+    programme-membership-updated: ${PROGRAMME_MEMBERSHIP_UPDATED_QUEUE}
+    programme-membership-deleted: ${PROGRAMME_MEMBERSHIP_DELETED_QUEUE}
+  sns:
+    notifications-event:
+      arn: ${NOTIFICATIONS_EVENT_TOPIC_ARN:}
+  template-versions:
+    coj-confirmation:
+      email: v1.0.0
+    credential-revoked:
+      email: v1.0.0
+    day-one:
+      in-app: v1.0.0
+    deferral:
+      in-app: v1.0.0
+    e-portfolio:
+      in-app: v1.0.0
+    email-updated-new:
+      email: v1.0.0
+    email-updated-old:
+      email: v1.0.0
+    form-updated:
+      email: v1.0.0
+    indemnity-insurance:
+      in-app: v1.0.0
+    less-than-full-time:
+      in-app: v1.0.0
+    non-employment:
+      in-app: v1.0.0
+    placement-information:
+      in-app: v1.0.0
+    placement-useful-information:
+      in-app: v1.0.0
+    sponsorship:
+      in-app: v1.0.0
+    welcome:
+      in-app: v1.0.0
+  timezone: Europe/London
+
+com:
+  amazonaws:
+    xray:
+      emitters:
+        daemon-address: ${AWS_XRAY_DAEMON_ADDRESS:}
+
+mongock:
+  migration-scan-package: uk.nhs.tis.trainee.notifications.migration
+  transaction-enabled: false
 
 sentry:
   dsn: ${SENTRY_DSN:}
-  environment: ${SENTRY_ENVIRONMENT:}
+  environment: application.environment
+
+spring:
+  cloud:
+    aws:
+      endpoint: ${AWS_ENDPOINT:}
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USER:admin}:${MONGO_PASSWORD:pwd}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DB:notifications}?authSource=admin
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      ssl:
+        enabled: ${REDIS_SSL:false}
+      username: ${REDIS_USERNAME:default}
+      password: ${REDIS_PASSWORD:password}
+  datasource:
+    driver: com.mysql.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/notifications?useUnicode=true&characterEncoding=utf8&useSSL=${MYSQL_SSL:false}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+  flyway:
+    baseline-version: 1 # version to start migration
+    baseline-on-migrate: true
+    fail-on-missing-locations: false # Check that migration scripts location exists
+    clean-on-validation-error: false
+    init-sqls: # SQL statements to execute to initialize a connection immediately after obtaining it.
+    locations: classpath:db/migration
+    out-of-order: true
+    password: ${spring.datasource.password}
+    schemas: notifications
+    sql-migration-prefix: V
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}?useUnicode=true&characterEncoding=utf8&useSSL=${MYSQL_SSL:false}
+    user: ${spring.datasource.username}
+    enabled: true
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    jobStore:
+      useProperties: true
+    properties:
+      org.quartz:
+        scheduler:
+          instanceId: AUTO
+        jobStore:
+          isClustered: true
+
+service:
+  trainee:
+    host: ${TRAINEE_DETAILS_HOST:localhost}
+    port: ${TRAINEE_DETAILS_PORT:8203}
+    url: http://${service.trainee.host}:${service.trainee.port}/trainee
+  reference:
+    host: ${TRAINEE_REFERENCE_HOST:localhost}
+    port: ${TRAINEE_REFERENCE_PORT:8205}
+    url: http://${service.trainee.host}:${service.reference.port}/reference

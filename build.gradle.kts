@@ -1,6 +1,6 @@
 plugins {
   java
-  id("org.springframework.boot") version "3.2.4"
+  id("org.springframework.boot") version "3.3.0"
   id("io.spring.dependency-management") version "1.1.4"
 
   // Code quality plugins
@@ -9,9 +9,8 @@ plugins {
   id("org.sonarqube") version "4.4.1.3373"
 }
 
-// TODO: Update group to end with "admin" or "trainee".
-group = "uk.nhs.tis"
-version = "0.0.1"
+group = "uk.nhs.tis.trainee"
+version = "1.30.0"
 
 configurations {
   compileOnly {
@@ -23,11 +22,34 @@ repositories {
   mavenCentral()
 }
 
+dependencyManagement {
+  imports {
+    mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.0")
+    mavenBom("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
+  }
+}
+
 dependencies {
   // Spring Boot starters
   implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+  implementation("org.springframework.boot:spring-boot-starter-data-redis")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-mail")
+  implementation("org.springframework.boot:spring-boot-starter-quartz")
+  implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.springframework.boot:spring-boot-starter-web")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-ses")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-sns")
+  implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs")
+  implementation("software.amazon.awssdk:cognitoidentityprovider")
+  implementation("com.amazonaws:aws-xray-recorder-sdk-spring:2.15.1")
+
+  implementation("com.mysql:mysql-connector-j")
+  implementation("org.flywaydb:flyway-core")
+  implementation("org.flywaydb:flyway-mysql")
 
   // Lombok
   compileOnly("org.projectlombok:lombok")
@@ -39,10 +61,24 @@ dependencies {
   annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
   testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
 
+  val mongockVersion = "5.4.0"
+  implementation("io.mongock:mongock-springboot-v3:${mongockVersion}")
+  implementation("io.mongock:mongodb-springdata-v4-driver:${mongockVersion}")
+
   // Sentry reporting
   val sentryVersion = "7.6.0"
   implementation("io.sentry:sentry-spring-boot-starter-jakarta:$sentryVersion")
-  implementation("io.sentry:sentry-logback:$sentryVersion")
+  implementation("io.sentry:sentry-logback:${sentryVersion}")
+
+  testImplementation("org.springframework.cloud:spring-cloud-starter-bootstrap")
+  val playtikaTestcontainersVersion = "3.1.5"
+  testImplementation("com.playtika.testcontainers:embedded-mongodb:$playtikaTestcontainersVersion")
+  testImplementation("com.playtika.testcontainers:embedded-mysql:$playtikaTestcontainersVersion")
+  testImplementation("com.playtika.testcontainers:embedded-redis:$playtikaTestcontainersVersion")
+  testImplementation("com.h2database:h2")
+  testImplementation("org.testcontainers:junit-jupiter:1.19.8")
+
+  testImplementation("org.jsoup:jsoup:1.17.2")
 }
 
 java {
@@ -61,8 +97,7 @@ sonarqube {
     property("sonar.host.url", "https://sonarcloud.io")
     property("sonar.login", System.getenv("SONAR_TOKEN"))
     property("sonar.organization", "health-education-england")
-    // TODO: Update sonar.projectKey to real value.
-    property("sonar.projectKey", "Health-Education-England_tis-microservice-template")
+    property("sonar.projectKey", "Health-Education-England_tis-trainee-notifications")
 
     property("sonar.java.checkstyle.reportPaths",
       "build/reports/checkstyle/main.xml,build/reports/checkstyle/test.xml")

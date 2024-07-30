@@ -1,0 +1,31 @@
+application:
+  cognito:
+    user-pool-id: dummy-value
+  domain: https://local.notifications.com
+  email:
+    sender: dummy-value
+  queues:
+    coj-received: dummy-value
+
+mongock:
+  enabled: false
+
+spring:
+  cloud:
+    aws:
+      region:
+        static: aws-global
+      sqs:
+        enabled: false
+    compatibility-verifier:
+      enabled: false # TODO: For unknown reasons there is currently a flagged incompatibility between Spring Cloud 2022.0.4 and Spring Boot 3.1.x.
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;IGNORECASE=TRUE;MODE=MySQL
+    name:
+    username: sa
+    password:
+  flyway:
+    url: ${spring.datasource.url}
+  quartz:
+    auto-startup: false
