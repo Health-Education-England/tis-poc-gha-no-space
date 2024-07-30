@@ -46,7 +46,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -71,7 +70,6 @@ import uk.nhs.tis.trainee.notifications.service.HistoryService;
 import uk.nhs.tis.trainee.notifications.service.TemplateService;
 import uk.nhs.tis.trainee.notifications.service.UserAccountService;
 
-@Disabled
 @SpringBootTest(classes = {CredentialListener.class, EmailService.class, TemplateService.class})
 @ActiveProfiles("test")
 @ImportAutoConfiguration(ThymeleafAutoConfiguration.class)
