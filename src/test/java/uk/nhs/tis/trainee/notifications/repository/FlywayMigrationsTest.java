@@ -23,7 +23,6 @@ package uk.nhs.tis.trainee.notifications.repository;
 
 import jakarta.validation.constraints.NotNull;
 import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -33,7 +33,6 @@ import static uk.nhs.tis.trainee.notifications.model.NotificationType.COJ_CONFIR
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,7 +43,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.nhs.tis.trainee.notifications.model.History;
 
-@Disabled
 @SpringBootTest(properties = {"embedded.containers.enabled=true", "embedded.mongodb.enabled=true"})
 @ActiveProfiles({"mongodb", "test"})
 @Testcontainers(disabledWithoutDocker = true)
