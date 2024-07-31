@@ -34,7 +34,6 @@ import org.springframework.test.context.TestExecutionListener;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.nhs.tis.trainee.notifications.config.MongoCollectionConfiguration;
 
-@Disabled
 @SpringBootTest(properties = {"embedded.containers.enabled=true", "embedded.mysql.enabled=true"})
 @ActiveProfiles({"test", "mysql"})
 @Testcontainers(disabledWithoutDocker = true)
