@@ -74,15 +74,4 @@ public interface HistoryMapper {
   @Mapping(target = "status", source = "entity.status")
   @Mapping(target = "statusDetail", source = "entity.statusDetail")
   HistoryDto toDto(History entity, String subjectText);
-
-  /**
-   * Calculate the readAt field based on the entity and status.
-   *
-   * @param entity The entity to calculate the readAt for.
-   * @param status The notification status.
-   * @return The readAt value to use for the entity.
-   */
-  default Instant calculateReadAt(History entity, NotificationStatus status) {
-    return entity.readAt() == null && status.equals(READ) ? Instant.now() : entity.readAt();
-  }
 }

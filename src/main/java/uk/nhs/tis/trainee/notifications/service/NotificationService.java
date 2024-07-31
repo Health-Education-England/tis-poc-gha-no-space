@@ -21,8 +21,6 @@
 
 package uk.nhs.tis.trainee.notifications.service;
 
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
 import static uk.nhs.tis.trainee.notifications.model.HrefType.ABSOLUTE_URL;
 import static uk.nhs.tis.trainee.notifications.model.HrefType.NON_HREF;
 import static uk.nhs.tis.trainee.notifications.model.HrefType.PROTOCOL_EMAIL;
@@ -35,10 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -63,7 +54,6 @@ import uk.nhs.tis.trainee.notifications.model.History.TisReferenceInfo;
 import uk.nhs.tis.trainee.notifications.model.LocalOfficeContactType;
 import uk.nhs.tis.trainee.notifications.model.MessageType;
 import uk.nhs.tis.trainee.notifications.model.NotificationType;
-import uk.nhs.tis.trainee.notifications.model.Placement;
 import uk.nhs.tis.trainee.notifications.model.ProgrammeMembership;
 
 /**
@@ -96,10 +86,8 @@ public class NotificationService implements Job {
   private final String templateVersion;
   private final String serviceUrl;
   private final String referenceUrl;
-  private final Scheduler scheduler;
   private final MessagingControllerService messagingControllerService;
   private final List<String> notificationsWhitelist;
-  private final String timezone;
   protected final Integer immediateNotificationDelayMinutes;
 
   /**
@@ -127,14 +115,12 @@ public class NotificationService implements Job {
       @Value("${application.timezone}") String timezone) {
     this.emailService = emailService;
     this.restTemplate = restTemplate;
-    this.scheduler = scheduler;
     this.templateVersion = templateVersion;
     this.serviceUrl = serviceUrl;
     this.referenceUrl = referenceUrl;
     this.messagingControllerService = messagingControllerService;
     this.immediateNotificationDelayMinutes = notificationDelay;
     this.notificationsWhitelist = notificationsWhitelist;
-    this.timezone = timezone;
   }
 
   /**
@@ -266,94 +252,6 @@ public class NotificationService implements Job {
   }
 
   /**
-   * Schedule a notification.
-   *
-   * @param jobId      The job id. This must be unique for programme membership / placement and
-   *                   notification milestone.
-   * @param jobDataMap The map of job data.
-   * @param when       The date to schedule the notification to be sent.
-   * @throws SchedulerException if the job could not be scheduled.
-   */
-  public void scheduleNotification(String jobId, JobDataMap jobDataMap, Date when)
-      throws SchedulerException {
-    JobDetail job = newJob(NotificationService.class)
-        .withIdentity(jobId)
-        .usingJobData(jobDataMap)
-        .storeDurably(false)
-        .build();
-
-    Trigger trigger = newTrigger()
-        .withIdentity(TRIGGER_ID_PREFIX + jobId)
-        .startAt(when)
-        .build();
-
-    Date scheduledDate = scheduler.scheduleJob(job, trigger);
-    log.info("Notification for {} scheduled for {}", jobId, scheduledDate);
-  }
-
-  /**
-   * Remove a scheduled notification if it exists.
-   *
-   * @param jobId The job id key to remove.
-   * @throws SchedulerException if the scheduler failed in its duties (non-existent jobs do not
-   *                            trigger this exception).
-   */
-  public void removeNotification(String jobId) throws SchedulerException {
-    JobKey jobKey = new JobKey(jobId);
-    // Delete the job and unschedule its triggers.
-    // We do not simply remove the trigger, since a replacement job may have different data
-    // (e.g. programme name).
-    scheduler.deleteJob(jobKey);
-    log.info("Removed any stale notification scheduled for {}", jobId);
-  }
-
-  /**
-   * Get a future schedule for a notification from the start date and day offset.
-   *
-   * @param startDate       The starting date.
-   * @param daysBeforeStart The number of days prior to the start date.
-   * @return The notification scheduling date and time.
-   */
-  public Date getScheduleDate(LocalDate startDate, int daysBeforeStart) {
-    Date milestone;
-    LocalDate milestoneDate = startDate.minusDays(daysBeforeStart);
-    if (!milestoneDate.isAfter(LocalDate.now())) {
-      // 'Missed' milestones: schedule to be sent soon, but not immediately
-      // in case of human editing 'jitter'.
-      milestone = Date.from(Instant.now()
-          .plus(immediateNotificationDelayMinutes, ChronoUnit.MINUTES));
-    } else {
-      // Future milestone.
-      milestone = Date.from(milestoneDate
-          .atStartOfDay()
-          .atZone(ZoneId.of(timezone))
-          .toInstant());
-    }
-    return milestone;
-  }
-
-  /**
-   * Get a display date for an in-app notification from the start date and day offset.
-   *
-   * @param startDate       The starting date.
-   * @param daysBeforeStart The number of days prior to the start date.
-   * @return The in-app notification display date and time.
-   */
-  public Instant calculateInAppDisplayDate(LocalDate startDate, int daysBeforeStart) {
-    LocalDate milestoneDate = startDate.minusDays(daysBeforeStart);
-    if (!milestoneDate.isAfter(LocalDate.now())) {
-      // 'Missed' milestones: display immediately
-      return Instant.now();
-    } else {
-      // Future milestone.
-      return milestoneDate
-          .atStartOfDay()
-          .atZone(ZoneId.of(timezone))
-          .toInstant();
-    }
-  }
-
-  /**
    * Map the user details from Cognito and trainee-profile. (Map gmcNumber from the Trainee Details
    * profile, map email and familyName from Cognito if they have signed-up to TIS Self-Service, or
    * from the Trainee Details profile if not)
@@ -452,57 +350,6 @@ public class NotificationService implements Job {
     }
 
     return true;
-  }
-
-  /**
-   * Check whether a placement meets the selected notification criteria.
-   *
-   * @param placement         The placement to check.
-   * @param checkPilot        Whether the trainee must be in a pilot.
-   * @return true if all criteria met, or false if one or more criteria fail.
-   */
-  public boolean meetsCriteria(Placement placement, boolean checkPilot) {
-    String traineeId = placement.getPersonId();
-    String pmId = placement.getTisId();
-
-    if (checkPilot) {
-      boolean isInPilot
-          = messagingControllerService.isPlacementInPilot2024(traineeId, pmId);
-
-      if (!isInPilot) {
-        log.info("Skipping notification creation as trainee {} is not in the pilot.", traineeId);
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Check whether a programme membership's trainee should receive the given message-type
-   * notification.
-   *
-   * @param programmeMembership The programme membership to check.
-   * @param messageType         The potential notification message type.
-   * @return true if the trainee should receive the notification, otherwise false.
-   */
-  public boolean programmeMembershipIsNotifiable(ProgrammeMembership programmeMembership,
-      MessageType messageType) {
-    String traineeId = programmeMembership.getPersonId();
-    return messagingControllerService.isValidRecipient(traineeId, messageType);
-  }
-
-  /**
-   * Check whether a placement's trainee should receive the given message-type
-   * notification.
-   *
-   * @param placement     The placement to check.
-   * @param messageType   The potential notification message type.
-   * @return true if the trainee should receive the notification, otherwise false.
-   */
-  public boolean placementIsNotifiable(Placement placement, MessageType messageType) {
-    String traineeId = placement.getPersonId();
-    return messagingControllerService.isValidRecipient(traineeId, messageType);
   }
 
   /**

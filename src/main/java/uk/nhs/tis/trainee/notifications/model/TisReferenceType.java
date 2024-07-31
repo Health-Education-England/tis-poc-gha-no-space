@@ -27,8 +27,6 @@ package uk.nhs.tis.trainee.notifications.model;
 public enum TisReferenceType {
 
   PLACEMENT,
-  PROGRAMME_MEMBERSHIP,
-  FORMR_PARTA,
-  FORMR_PARTB
+  PROGRAMME_MEMBERSHIP
 
 }
