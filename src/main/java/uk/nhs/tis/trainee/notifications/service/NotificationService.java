@@ -69,7 +69,6 @@ public class NotificationService implements Job {
       = "your local office";
 
   public static final String API_TRAINEE_DETAILS = "/api/trainee-profile/account-details/{tisId}";
-  private static final String TRIGGER_ID_PREFIX = "trigger-";
 
   public static final String TEMPLATE_NOTIFICATION_TYPE_FIELD = "notificationType";
   public static final String TEMPLATE_OWNER_CONTACT_FIELD = "localOfficeContact";

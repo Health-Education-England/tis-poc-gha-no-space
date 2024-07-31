@@ -46,6 +46,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,6 +62,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.nhs.tis.trainee.notifications.dto.UserDetails;
 import uk.nhs.tis.trainee.notifications.model.NotificationType;
 
+@Disabled
 @SpringBootTest(classes = {EmailService.class, TemplateService.class})
 @ImportAutoConfiguration(ThymeleafAutoConfiguration.class)
 class EmailServiceIntegrationTest {

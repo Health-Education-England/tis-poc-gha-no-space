@@ -54,11 +54,6 @@ import uk.nhs.tis.trainee.notifications.repository.HistoryRepository;
 @Service
 public class HistoryService {
 
-  private static final Map<MessageType, Set<NotificationStatus>> VALID_STATUSES = Map.of(
-      EMAIL, Set.of(FAILED, SENT),
-      IN_APP, Set.of(ARCHIVED, READ, UNREAD)
-  );
-
   private final HistoryRepository repository;
   private final TemplateService templateService;
   private final EventBroadcastService eventBroadcastService;
@@ -149,19 +144,6 @@ public class HistoryService {
             && h.tisReference().type().equals(tisReferenceType))
         .toList();
   }
-
-  /**
-   * Delete notification history by history ID and trainee ID.
-   *
-   * @param id The object ID of the history to delete.
-   * @param traineeId The ID of the trainee to get notifications for.
-   */
-  public void deleteHistoryForTrainee(ObjectId id, String traineeId) {
-    repository.deleteByIdAndRecipient_Id(id, traineeId);
-    eventBroadcastService.publishNotificationsDeleteEvent(id);
-    log.info("Removed notification history {} for {}", id, traineeId);
-  }
-
 
   /**
    * Convert a history entity to an equivalent DTO, handles in-app subject text.
