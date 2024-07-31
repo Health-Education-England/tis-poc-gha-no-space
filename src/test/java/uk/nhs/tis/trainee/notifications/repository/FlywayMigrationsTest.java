@@ -21,22 +21,42 @@
 
 package uk.nhs.tis.trainee.notifications.repository;
 
+import static uk.nhs.tis.trainee.notifications.TestContainerConfiguration.MYSQL;
+
 import jakarta.validation.constraints.NotNull;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.nhs.tis.trainee.notifications.config.MongoCollectionConfiguration;
 
-@SpringBootTest(properties = {"embedded.containers.enabled=true", "embedded.mysql.enabled=true"})
-@ActiveProfiles({"test", "mysql"})
+@SpringBootTest
+@ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
 class FlywayMigrationsTest implements TestExecutionListener {
+
+  @Container
+  @ServiceConnection
+  private static final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL);
+
+  @DynamicPropertySource
+  private static void overrideProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.flyway.url", mySqlContainer::getJdbcUrl);
+    registry.add("spring.flyway.schemas", mySqlContainer::getDatabaseName);
+    registry.add("spring.flyway.user", mySqlContainer::getUsername);
+    registry.add("spring.flyway.password", mySqlContainer::getPassword);
+//    registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+  }
 
   @MockBean
   private MongoCollectionConfiguration mongoConfiguration;
