@@ -35,20 +35,6 @@ import uk.nhs.tis.trainee.notifications.model.Placement;
 public interface PlacementMapper {
 
   /**
-   * Map a record data map to a Placement.
-   *
-   * @param recordData The map to convert.
-   * @return The mapped Placement.
-   */
-  @Mapping(target = "tisId", source = "recordData.id")
-  @Mapping(target = "personId", source = "recordData.traineeId")
-  @Mapping(target = "startDate", source = "recordData.dateFrom")
-  @Mapping(target = "placementType", source = "recordData.placementType")
-  @Mapping(target = "owner", source = "recordData.owner")
-  @Mapping(target = "site", expression = "java(calculateSite(recordData))")
-  Placement toEntity(Map<String, String> recordData);
-
-  /**
    * Determine the site name to use, with 'site known as' preferred.
    *
    * @param recordData The record data map.

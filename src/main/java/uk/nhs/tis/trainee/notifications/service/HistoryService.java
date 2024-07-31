@@ -92,75 +92,6 @@ public class HistoryService {
   }
 
   /**
-   * Update the status of a notification.
-   *
-   * @param notificationId The notification to update the status of.
-   * @param status         The new status.
-   * @param detail         The detail of the status.
-   * @return The updated notification history, or empty if not found.
-   */
-  public Optional<HistoryDto> updateStatus(String notificationId, NotificationStatus status,
-      String detail) {
-    Optional<History> optionalHistory = repository.findById(new ObjectId(notificationId));
-
-    if (optionalHistory.isEmpty()) {
-      log.info("Notification {} was not found.", notificationId);
-      return Optional.empty();
-    }
-
-    return updateStatus(optionalHistory.get(), status, detail);
-  }
-
-  /**
-   * Update the status of a notification.
-   *
-   * @param traineeId      The ID of the trainee.
-   * @param notificationId The notification to update the status of.
-   * @param status         The new status.
-   * @return The updated notification history, or empty if not found.
-   */
-  public Optional<HistoryDto> updateStatus(String traineeId, String notificationId,
-      NotificationStatus status) {
-    Optional<History> optionalHistory = repository.findByIdAndRecipient_Id(
-        new ObjectId(notificationId), traineeId);
-
-    if (optionalHistory.isEmpty()) {
-      log.info("Notification {} was not found for trainee {}.", notificationId, traineeId);
-      return Optional.empty();
-    }
-
-    return updateStatus(optionalHistory.get(), status, null);
-  }
-
-  /**
-   * Update the status of a notification.
-   *
-   * @param history The notification history to update.
-   * @param status  The new status.
-   * @param detail  The detail of the status.
-   * @return The updated notification history, or empty if not found.
-   */
-  private Optional<HistoryDto> updateStatus(History history, NotificationStatus status,
-      String detail) {
-
-    // Validate the status is valid for the notification type.
-    MessageType type = history.recipient().type();
-    boolean valid = VALID_STATUSES.get(type).contains(status);
-
-    if (!valid) {
-      String message = String.format(
-          "Invalid combination of type %s and status %s for notification %s.", type, status,
-          history.id());
-      throw new IllegalArgumentException(message);
-    }
-
-    history = mapper.updateStatus(history, status, detail);
-    history = repository.save(history);
-    eventBroadcastService.publishNotificationsEvent(history);
-    return Optional.of(toDto(history));
-  }
-
-  /**
    * Find all historic notifications for the given Trainee.
    *
    * @param traineeId The ID of the trainee to get notifications for.
@@ -197,17 +128,6 @@ public class HistoryService {
         .dropWhile(h -> h.sentAt().isAfter(Instant.now()))
         .map(this::toDto)
         .toList();
-  }
-
-  /**
-   * Final all historic notifications for a given Trainee with a Failed status.
-   *
-   * @param traineeId The ID of the trainee to get notifications for.
-   * @return The found notifications, empty if none found.
-   */
-  public List<History> findAllFailedForTrainee(String traineeId) {
-    return repository.findAllByRecipient_IdAndStatus(traineeId,
-        NotificationStatus.FAILED.name());
   }
 
   /**

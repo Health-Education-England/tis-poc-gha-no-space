@@ -103,25 +103,4 @@ public class MethodArgumentUtil {
 
     return arguments.stream();
   }
-
-  /**
-   * Get all combinations for {@link MessageType} and {@link NotificationType}.
-   *
-   * @return A stream of MessageType and NotificationType combinations, indexed in that order.
-   */
-  public static Stream<Arguments> getTemplateCombinations() {
-    return Arrays.stream(MessageType.values())
-        .flatMap(mt -> Arrays.stream(NotificationType.values()).map(nt -> Arguments.of(mt, nt)));
-  }
-
-  /**
-   * Get all non-ProgrammeMembershipUpdate Notification Types.
-   *
-   * @return A stream of NotificationType.
-   */
-  public static Stream<Arguments> getNonProgrammeUpdateNotificationTypes() {
-    return Arrays.stream(NotificationType.values())
-        .filter(n -> !NotificationType.getProgrammeUpdateNotificationTypes().contains(n))
-        .map(Arguments::of);
-  }
 }

@@ -91,20 +91,4 @@ public class InAppService {
     createNotifications(traineeId, tisReference, notificationType, templateVersion,
         templateVariables, doNotStoreJustLog, Instant.now());
   }
-
-  /**
-   * Create an in-app notification.
-   *
-   * @param traineeId         The trainee ID to associate the notification with.
-   * @param tisReference      The TIS reference of the associated object.
-   * @param notificationType  The type of notification.
-   * @param templateVersion   The version of the template to use.
-   * @param templateVariables The variables to insert in to the template.
-   */
-  public void createNotifications(String traineeId, TisReferenceInfo tisReference,
-      NotificationType notificationType, String templateVersion,
-      Map<String, Object> templateVariables) {
-    createNotifications(traineeId, tisReference, notificationType, templateVersion,
-        templateVariables, false);
-  }
 }

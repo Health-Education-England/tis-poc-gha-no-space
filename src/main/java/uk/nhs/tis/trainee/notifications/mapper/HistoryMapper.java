@@ -39,14 +39,6 @@ import uk.nhs.tis.trainee.notifications.model.NotificationStatus;
 public interface HistoryMapper {
 
   /**
-   * Convert history entities to history DTOs.
-   *
-   * @param entities The history entities to convert.
-   * @return The converted history DTOs.
-   */
-  List<HistoryDto> toDtos(List<History> entities);
-
-  /**
    * Convert a history entity to a history DTO.
    *
    * @param entity The history entity to convert.
@@ -82,19 +74,6 @@ public interface HistoryMapper {
   @Mapping(target = "status", source = "entity.status")
   @Mapping(target = "statusDetail", source = "entity.statusDetail")
   HistoryDto toDto(History entity, String subjectText);
-
-  /**
-   * Update the status of the given history entity.
-   *
-   * @param entity The history to update the status of.
-   * @param status The new status.
-   * @param detail Any relevant status detail.
-   * @return The updated history entity.
-   */
-  @Mapping(target = "status", source = "status")
-  @Mapping(target = "statusDetail", source = "detail")
-  @Mapping(target = "readAt", expression = "java(calculateReadAt(entity, status))")
-  History updateStatus(History entity, NotificationStatus status, String detail);
 
   /**
    * Calculate the readAt field based on the entity and status.

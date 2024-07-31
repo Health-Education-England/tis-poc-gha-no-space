@@ -44,17 +44,6 @@ import uk.nhs.tis.trainee.notifications.model.ResponsibleOfficer;
 public interface ProgrammeMembershipMapper {
 
   /**
-   * Map a record data map to a ProgrammeMembership.
-   *
-   * @param recordData The map to convert.
-   * @return The mapped ProgrammeMembership.
-   */
-  @Mapping(target = "curricula", source = "recordData.curricula")
-  @Mapping(target = "tisId", source = "recordData.tisId")
-  @Mapping(target = "startDate", source = "recordData.startDate")
-  ProgrammeMembership toEntity(Map<String, String> recordData);
-
-  /**
    * Map a serialized list of curricula.
    *
    * @param curriculumString The serialized curricula.

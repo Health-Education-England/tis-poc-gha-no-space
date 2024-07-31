@@ -53,15 +53,6 @@ public interface HistoryRepository extends
   Optional<History> findByIdAndRecipient_Id(ObjectId id, String recipientId);
 
   /**
-   * Find all history for the given recipient ID and status.
-   *
-   * @param recipientId The ID of the recipient to get the history for.
-   * @param status      The message status.
-   * @return The found history, empty if none found.
-   */
-  List<History> findAllByRecipient_IdAndStatus(String recipientId, String status);
-
-  /**
    * Remove history Notifications by ID and recipientId.
    *
    * @param id          The ID of the history record.
